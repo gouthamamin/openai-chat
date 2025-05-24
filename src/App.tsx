@@ -1,6 +1,11 @@
 import { BsSend } from "react-icons/bs";
 import UserQuery from "./components/UserQuery";
 import BotResponse from "./components/BotResponse";
+import { IoSunnySharp } from "react-icons/io5";
+import { FaRegUser } from "react-icons/fa";
+import { MdLogout } from "react-icons/md";
+import { MdOpenInNew } from "react-icons/md";
+import { FiEdit } from "react-icons/fi";
 
 const App = () => {
   return (
@@ -8,9 +13,9 @@ const App = () => {
       {/* sidebar */}
       <div className="w-[20%] h-full text-white p-4">
         {/* upper division */}
-        <div className="w-full h-[40%] flex flex-col gap-4">
-          <div className="flex justify-start items-center border border-white/20 rounded-md px-4 py-2 gap-2">
-            <p className="text-2xl">+</p>
+        <div className="w-full h-[70%] flex flex-col gap-4 border-b border-white/20">
+          <div className="flex justify-start items-center border border-white/20 rounded-md px-4 py-2 gap-4 cursor-pointer">
+            <FiEdit />
             <p className="">New Chat</p>
           </div>
 
@@ -19,6 +24,27 @@ const App = () => {
           </div>
         </div>
 
+        {/* lower division */}
+        <div className="w-full h-[30%] flex flex-col justify-start gap-4 mt-4">
+          <div className="flex justify-start items-center gap-4 cursor-pointer">
+            <IoSunnySharp />
+            <p>Light Mode</p>
+          </div>
+          <div className="flex justify-start items-center gap-4 cursor-pointer">
+            <FaRegUser />
+            <p>My Account</p>
+
+          </div>
+          <div className="flex justify-start items-center gap-4 cursor-pointer">
+            <MdOpenInNew />
+            <p>Updates & FAQ</p>
+          </div>
+          <div className="flex justify-start items-center gap-4 cursor-pointer">
+            <MdLogout />
+            <p>Logout</p>
+          </div>
+
+        </div>
       </div>
 
       {/* main content */}
@@ -33,7 +59,7 @@ const App = () => {
         </div>
 
         <div className="w-full h-[75%] bg-themeGray-44 flex justify-center items-center">
-          <div className="w-[80%] h-full overflow-y-scroll p-4 scrollbar-hide"> 
+          <div className="w-[80%] h-full overflow-y-scroll p-4 scrollbar-hide">
             <UserQuery />
             <BotResponse />
           </div>
