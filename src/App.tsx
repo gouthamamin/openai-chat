@@ -1,4 +1,6 @@
 import { BsSend } from "react-icons/bs";
+import UserQuery from "./components/UserQuery";
+import BotResponse from "./components/BotResponse";
 
 const App = () => {
   return (
@@ -30,8 +32,11 @@ const App = () => {
           </div>
         </div>
 
-        <div className="w-full h-[75%] bg-themeGray-44">
-
+        <div className="w-full h-[75%] bg-themeGray-44 flex justify-center items-center">
+          <div className="w-[80%] h-full overflow-y-scroll p-4 scrollbar-hide"> 
+            <UserQuery />
+            <BotResponse />
+          </div>
         </div>
         <div className="w-full h-[15%] flex flex-col gap-2 p-4 justify-center items-center bg-themeGray-40 ">
           <div className="inline-flex justify-center items-center text-white text-md gap-2 border border-white rounded-md px-4 py-1 cursor-pointer">
