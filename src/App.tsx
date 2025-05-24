@@ -21,9 +21,15 @@ const App = () => {
 
       {/* main content */}
       <div className="w-[80%] h-full bg-themeGray-44 flex flex-col">
-        <div className="w-full h-[10%] flex justify-center items-center bg-themeGray-40 text-white">
-          Welcome to openai chat
+        <div className="w-full h-[10%] flex items-center bg-themeGray-40 text-white relative">
+          <div className="text-2xl px-4">
+            Open AI
+          </div>
+          <div className="absolute left-1/2 transform -translate-x-1/2 text-md text-center">
+            Welcome to the openai chat
+          </div>
         </div>
+
         <div className="w-full h-[75%] bg-themeGray-44">
 
         </div>
