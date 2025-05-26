@@ -69,7 +69,7 @@ const App = () => {
             <img src="./images/regenerate-icon.png" alt="regenerate-icon" className="w-4 h-4" />
             <p>Regenarate response</p>
           </div>
-          <div className="w-[40%] flex justify-center items-center bg-themeGray-8E rounded-md">
+          <div className="w-[60%] flex justify-center items-center bg-themeGray-20/50 rounded-md">
             <input type="text" placeholder="Ask anything" className="h-10 flex-1 text-white px-4 py-2 bg-transparent outline-none focus:outline-none" />
             <BsSend className="w-10 h-10 text-white cursor-pointer p-2" />
           </div>
