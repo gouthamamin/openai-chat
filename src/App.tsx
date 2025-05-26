@@ -17,6 +17,8 @@ interface iChatMessage {
 const App = () => {
   const [chatMessages, setChatMessages] = useState<iChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState<string>("");
+  const [lastUserMessage, setLastUserMessage] = useState("");
+
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +31,7 @@ const App = () => {
 
     const userMsg: iChatMessage = { isBot: false, message: inputMessage };
     setChatMessages((prev) => [...prev, userMsg]);
+    setLastUserMessage(inputMessage); // save the latest message
     setInputMessage("");
 
     try {
@@ -48,6 +51,35 @@ const App = () => {
       ]);
     }
   }
+
+  const handleRegenerateResponse = async () => {
+    if (!lastUserMessage) return;
+
+    try {
+      const result = await sendMessageToOpenAI(lastUserMessage);
+      if (!result.success) return;
+
+      setChatMessages((prev) => {
+        const lastBotIndex = [...prev].map(msg => msg.isBot).lastIndexOf(true);
+
+        if (lastBotIndex === -1) return prev;
+
+        const updated = [...prev];
+        updated[lastBotIndex] = {
+          isBot: true,
+          message: result.response,
+        };
+
+        return updated;
+      });
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        { isBot: true, message: "Error regenerating response." },
+      ]);
+    }
+  };
+
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,7 +148,7 @@ const App = () => {
           </div>
         </div>
         <div className="w-full h-[15%] flex flex-col gap-2 p-4 justify-center items-center bg-themeGray-40 ">
-          <div className="inline-flex justify-center items-center text-white text-md gap-2 border border-white rounded-md px-4 py-1 cursor-pointer">
+          <div className="inline-flex justify-center items-center text-white text-md gap-2 border border-white rounded-md px-4 py-1 cursor-pointer" onClick={handleRegenerateResponse}>
             <img src="./images/regenerate-icon.png" alt="regenerate-icon" className="w-4 h-4" />
             <p>Regenarate response</p>
           </div>
