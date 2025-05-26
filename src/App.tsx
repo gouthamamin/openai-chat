@@ -6,8 +6,53 @@ import { FaRegUser } from "react-icons/fa";
 import { MdLogout } from "react-icons/md";
 import { MdOpenInNew } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
+import { useEffect, useRef, useState } from "react";
+import sendMessageToOpenAI from "./services/Api";
+
+interface iChatMessage {
+  isBot: boolean,
+  message?: string
+};
 
 const App = () => {
+  const [chatMessages, setChatMessages] = useState<iChatMessage[]>([]);
+  const [inputMessage, setInputMessage] = useState<string>("");
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputMessage(e.target.value);
+  };
+
+  const handleSendMessage = async () => {
+  if (!inputMessage.trim()) return;
+
+    const userMsg: iChatMessage = { isBot: false, message: inputMessage };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setInputMessage("");
+
+    try {
+      const result = await sendMessageToOpenAI(inputMessage);
+      console.log(result);
+      if(!result.success) return
+      const botMsg: iChatMessage = {
+        isBot: true,
+        message:result.response,
+      };
+      setChatMessages((prev) => [...prev, botMsg]);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        { isBot: true, message: "Error connecting to server." },
+      ]);
+    }
+  }
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
   return (
     <div className="w-full h-full bg-primaryBackground flex">
       {/* sidebar */}
@@ -60,8 +105,14 @@ const App = () => {
 
         <div className="w-full h-[75%] bg-themeGray-44 flex justify-center items-center">
           <div className="w-[80%] h-full overflow-y-scroll p-4 scrollbar-hide">
-            <UserQuery />
-            <BotResponse />
+            {chatMessages.map((msg, index) =>
+              msg.isBot ? (
+                <BotResponse key={index} message={msg.message} />
+              ) : (
+                <UserQuery key={index} message={msg.message} />
+              )
+            )}
+            {/* <div ref={messagesEndRef} /> */}
           </div>
         </div>
         <div className="w-full h-[15%] flex flex-col gap-2 p-4 justify-center items-center bg-themeGray-40 ">
@@ -70,8 +121,11 @@ const App = () => {
             <p>Regenarate response</p>
           </div>
           <div className="w-[60%] flex justify-center items-center bg-themeGray-20/50 rounded-md">
-            <input type="text" placeholder="Ask anything" className="h-10 flex-1 text-white px-4 py-2 bg-transparent outline-none focus:outline-none" />
-            <BsSend className="w-10 h-10 text-white cursor-pointer p-2" />
+            <input type="text" placeholder="Ask anything" className="h-10 flex-1 text-white px-4 py-2 bg-transparent outline-none focus:outline-none" 
+            value={inputMessage}
+             onChange={handleInputChange}
+             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}/>
+            <BsSend className="w-10 h-10 text-white cursor-pointer p-2" onClick={handleSendMessage} />
           </div>
         </div>
       </div>
