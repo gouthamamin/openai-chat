@@ -3,7 +3,6 @@ name: openai-chat
 on:
   push:
     branches:
-      - main
       - deployment
   workflow_dispatch:
 
