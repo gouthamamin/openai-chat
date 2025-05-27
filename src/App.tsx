@@ -10,9 +10,10 @@ import { useEffect, useRef, useState } from "react";
 import sendMessageToOpenAI from "./services/Api";
 
 interface iChatMessage {
-  isBot: boolean,
-  message?: string
-};
+  isBot: boolean;
+  message?: string;
+  isTyping?: boolean;
+}
 
 const App = () => {
   const [chatMessages, setChatMessages] = useState<iChatMessage[]>([]);
@@ -34,49 +35,86 @@ const App = () => {
     setLastUserMessage(inputMessage); // save the latest message
     setInputMessage("");
 
+    // Add typing animation
+    const typingPlaceholder: iChatMessage = { isBot: true, isTyping: true };
+    setChatMessages((prev) => [...prev, typingPlaceholder]);
+
     try {
       const result = await sendMessageToOpenAI(inputMessage);
       console.log(result);
-      if(!result.success) return
-      const botMsg: iChatMessage = {
-        isBot: true,
-        message:result.response,
-      };
-      setChatMessages((prev) => [...prev, botMsg]);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      if (!result.success) return;
+
+      setChatMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          isBot: true,
+          message: result.response,
+        };
+        return updated;
+      });
     } catch (err) {
-      setChatMessages((prev) => [
-        ...prev,
-        { isBot: true, message: "Error connecting to server." },
-      ]);
+      setChatMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          isBot: true,
+          message: "Error connecting to server.",
+        };
+        return updated;
+      });
     }
-  }
+  };
 
   const handleRegenerateResponse = async () => {
     if (!lastUserMessage) return;
+
+    setChatMessages((prev) => {
+      const updated = [...prev];
+      // Find last bot message index
+      const lastBotIndex = [...prev].reverse().findIndex(msg => msg.isBot);
+      const actualIndex = lastBotIndex !== -1 ? prev.length - 1 - lastBotIndex : -1;
+
+      if (actualIndex !== -1) {
+        updated[actualIndex] = { isBot: true, isTyping: true }; // Replace with typing placeholder
+      } else {
+        updated.push({ isBot: true, isTyping: true }); // Fallback
+      }
+
+      return updated;
+    });
 
     try {
       const result = await sendMessageToOpenAI(lastUserMessage);
       if (!result.success) return;
 
       setChatMessages((prev) => {
-        const lastBotIndex = [...prev].map(msg => msg.isBot).lastIndexOf(true);
-
-        if (lastBotIndex === -1) return prev;
-
         const updated = [...prev];
-        updated[lastBotIndex] = {
-          isBot: true,
-          message: result.response,
-        };
+        const lastBotIndex = [...prev].reverse().findIndex(msg => msg.isBot);
+        const actualIndex = lastBotIndex !== -1 ? prev.length - 1 - lastBotIndex : -1;
+
+        if (actualIndex !== -1) {
+          updated[actualIndex] = {
+            isBot: true,
+            message: result.response,
+          };
+        }
 
         return updated;
       });
     } catch {
-      setChatMessages((prev) => [
-        ...prev,
-        { isBot: true, message: "Error regenerating response." },
-      ]);
+      setChatMessages((prev) => {
+        const updated = [...prev];
+        const lastBotIndex = [...prev].reverse().findIndex(msg => msg.isBot);
+        const actualIndex = lastBotIndex !== -1 ? prev.length - 1 - lastBotIndex : -1;
+
+        if (actualIndex !== -1) {
+          updated[actualIndex] = {
+            isBot: true,
+            message: "Error regenerating response.",
+          };
+        }
+
+        return updated;
+      });
     }
   };
 
@@ -135,10 +173,13 @@ const App = () => {
           </div>
         </div>
 
+        {/* Chat body */}
         <div className="w-full h-[75%] bg-themeGray-44 flex justify-center items-center">
           <div className="w-[80%] h-full overflow-y-scroll p-4 scrollbar-hide">
             {chatMessages.map((msg, index) =>
-              msg.isBot ? (
+              msg.isTyping ? (
+                <BotResponse key={index} isTyping={true} />
+              ) : msg.isBot ? (
                 <BotResponse key={index} message={msg.message} />
               ) : (
                 <UserQuery key={index} message={msg.message} />
